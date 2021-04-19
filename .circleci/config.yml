@@ -6,6 +6,14 @@ orbs:
   
 
 jobs:
+  
+  run-unit-test:
+    executor: python/default
+    steps:
+      - run:
+          command: |
+            python -m pytest tests/ -v
+
   build-and-test:
     executor: python/default
     steps:
@@ -13,10 +21,7 @@ jobs:
       - python/install-packages:
           pip-dependency-file: requirements/test.txt
           pkg-manager: pip
-      - run:
-          command: |
-            python -m pytest tests/ -v
-          name: Test
+      - run-unit-test
 
 workflows:
   main:
