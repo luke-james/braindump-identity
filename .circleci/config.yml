@@ -16,7 +16,7 @@ jobs:
       - run:
           command: |
             python -m pytest tests/ -v
-            
+
 workflows:
   test-and-deploy:
     jobs:
@@ -25,7 +25,7 @@ workflows:
       - sam/deploy:
           context: aws-credentials-context
           name: deploy-staging
-          bucket: braindump-identity
+          s3-bucket: braindump-identity
           stack-name: staging-braindump-identity
           template: ./template.yaml  
 
