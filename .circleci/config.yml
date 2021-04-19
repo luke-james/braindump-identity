@@ -15,7 +15,7 @@ jobs:
 workflows:
   main:
     jobs:
-      - build-and-test:
+      - python/test:
           args: '--dev'
           pkg-manager: pipenv
           test-tool: pytest
