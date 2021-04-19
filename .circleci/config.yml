@@ -6,9 +6,6 @@ orbs:
 jobs:
   build-and-test:
     executor: python/default
-    args: '--dev'
-    pkg-manager: pipenv
-    test-tool: pytest
     steps:
       - checkout
       - python/load-cache
@@ -18,4 +15,7 @@ jobs:
 workflows:
   main:
     jobs:
-      - build-and-test
+      - build-and-test:
+          args: '--dev'
+          pkg-manager: pipenv
+          test-tool: pytest
