@@ -27,5 +27,7 @@ workflows:
           name: deploy-staging
           s3-bucket: braindump-identity
           stack-name: staging-braindump-identity
-          template: ./template.yaml  
+          template: ./template.yaml
+          requires:
+            - run-unit-test
 
