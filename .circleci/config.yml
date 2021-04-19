@@ -9,7 +9,7 @@ jobs:
     steps:
       - checkout
       - python/install-packages:
-          pip-dependancy-file: requirements/test.txt
+          pip-dependency-file: requirements/test.txt
           pkg-manager: pip
       - run:
           command: |
