@@ -2,19 +2,19 @@ version: 2.1
 
 orbs:
   python: circleci/python@1.3.4
+  aws-sam-serverless: circleci/aws-sam-serverless@3.0.0
+  
 
 jobs:
   build-and-test:
     executor: python/default
     steps:
       - checkout
-      - python/install-packages:
+      - python/test:
           pip-dependency-file: requirements/test.txt
           pkg-manager: pip
-      - run:
-          command: |
-            pytest
-          name: Test
+          test-tool: pytest
+          version: '3.7'
 
 workflows:
   main:
