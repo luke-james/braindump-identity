@@ -10,13 +10,19 @@ jobs:
     executor: python/default
     steps:
       - checkout
-      - python/test:
+      - python/install-packages:
           pip-dependency-file: requirements/test.txt
           pkg-manager: pip
-          test-tool: pytest
-          version: '3.7'
+      - run:
+          command: |
+            pytest
+          name: Test
 
 workflows:
   main:
     jobs:
-      - build-and-test
+      - test:
+          pip-dependency-file: requirements/test.txt
+          pkg-manager: pip
+          test-tool: pytest
+          version: '3.7'
