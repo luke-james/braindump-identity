@@ -10,20 +10,31 @@ jobs:
   run-unit-test:
     executor: python/default
     steps:
-      - run:
-          command: |
-            python -m pytest tests/ -v
-
-  build-and-test:
-    executor: python/default
-    steps:
       - checkout
       - python/install-packages:
           pip-dependency-file: requirements/test.txt
           pkg-manager: pip
-      - run-unit-test
+      - run:
+          command: |
+            python -m pytest tests/ -v
+
+  deploy-to-staging:
+    executor: sam/default
+    steps:
+    - sam/deploy:
+        context: aws-credentials-context
+        name: deploy-staging
+        bucket: braindump-identity
+        stack-name: braindump-identity-staging
+        template: ./template.yaml        
 
 workflows:
-  main:
+  test-and-deploy:
     jobs:
-      - build-and-test
+      - run-unit-test:
+          name: run-unit-test
+      - deploy-to-staging:
+          name: deploy-to-aws-staging
+          requires: 
+            - run-unit-test
+
