@@ -21,8 +21,4 @@ jobs:
 workflows:
   main:
     jobs:
-      - test:
-          pip-dependency-file: requirements/test.txt
-          pkg-manager: pip
-          test-tool: pytest
-          version: '3.7'
+      - build-and-test
