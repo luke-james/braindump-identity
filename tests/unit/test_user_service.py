@@ -6,10 +6,14 @@ from create_user_account import app
 
 
 @pytest.fixture()
-def apigw_event():
+def apigw_event_full():
     """ Generates API GW Event"""
 
     return {
+        "username": "test_user1",
+        "email": "test@test.com",
+        "password": "password123",
+        "name": "Jon Smith",
         "body": '{ "test": "body"}',
         "resource": "/{proxy+}",
         "requestContext": {
@@ -62,9 +66,9 @@ def apigw_event():
     }
 
 
-def test_create_account_success(apigw_event, mocker):
+def test_create_account_success(apigw_event_full, mocker):
 
-    ret = app.lambda_handler(apigw_event, "")
+    ret = app.lambda_handler(apigw_event_full, "")
     data = json.loads(ret["body"])
 
     assert ret["statusCode"] == 200
@@ -74,9 +78,9 @@ def test_create_account_success(apigw_event, mocker):
                         check Email for validation code"
 
 @pytest.mark.skip(reason="no way of currently testing this")
-def test_create_account_username_exists(apigw_event, mocker):
+def test_create_account_username_exists(apigw_event_full, mocker):
 
-    ret = app.lambda_handler(apigw_event, "")
+    ret = app.lambda_handler(apigw_event_full, "")
     data = json.loads(ret["body"])
 
     assert ret["statusCode"] == 200
@@ -85,9 +89,9 @@ def test_create_account_username_exists(apigw_event, mocker):
     assert data["message"] == "This username already exists"
 
 @pytest.mark.skip(reason="no way of currently testing this")
-def test_create_account_invalid_password(apigw_event, mocker):
+def test_create_account_invalid_password(apigw_event_full, mocker):
 
-    ret = app.lambda_handler(apigw_event, "")
+    ret = app.lambda_handler(apigw_event_full, "")
     data = json.loads(ret["body"])
 
     assert ret["statusCode"] == 200
@@ -97,9 +101,9 @@ def test_create_account_invalid_password(apigw_event, mocker):
                           Special Chars & Numbers"
 
 @pytest.mark.skip(reason="no way of currently testing this")
-def test_create_account_email_exists(apigw_event, mocker):
+def test_create_account_email_exists(apigw_event_full, mocker):
 
-    ret = app.lambda_handler(apigw_event, "")
+    ret = app.lambda_handler(apigw_event_full, "")
     data = json.loads(ret["body"])
 
     assert ret["statusCode"] == 200
