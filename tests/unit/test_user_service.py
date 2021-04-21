@@ -73,7 +73,6 @@ def test_create_account_success(apigw_event, mocker):
     assert data["message"] == "Please confirm your signup, \
                         check Email for validation code"
 
-
 @pytest.mark.skip(reason="no way of currently testing this")
 def test_create_account_username_exists(apigw_event, mocker):
 
@@ -84,7 +83,6 @@ def test_create_account_username_exists(apigw_event, mocker):
     assert ret["statusCode"] == 200
     assert "message" in ret["body"]
     assert data["message"] == "This username already exists"
-
 
 @pytest.mark.skip(reason="no way of currently testing this")
 def test_create_account_invalid_password(apigw_event, mocker):
