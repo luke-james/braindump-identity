@@ -1,3 +1,5 @@
+import os
+
 import boto3
 import botocore.exceptions
 
@@ -7,9 +9,9 @@ import base64
 
 import json
 
-USER_POOL_ID = ''
-CLIENT_ID = ''
-CLIENT_SECRET = ''
+USER_POOL_ID = os.environ.get('USER_POOL_ID')
+CLIENT_ID = os.environ.get('CLIENT_ID')
+CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
 
 AUTH_METHODS = [
     "username",
