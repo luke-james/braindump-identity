@@ -60,33 +60,82 @@ def lambda_handler(event, context):
             "error": True,
             "statusCode": 400,
             "body": json.dumps({
-                "message": f"{ missing_field } missing"
+                "message": f"{ missing_field } is missing"
             }),
             "data": None
         }
 
+    cognito_client = get_cognito_client()
 
     try:
 
-        cognito_response = get_cognito_client().sign_up(
-
+        cognito_response = cognito_client.sign_up(
             ClientId=CLIENT_SECRET,
             SecretHash=get_secret_hash(event['username']),
-            
             Username=event['username'],
             Password=event['password'],
-
             UserAttributes=[
                 {
                     'Name': "name",
                     'Value': event['name']
                 },
                 {
-
+                    'Name': "email",
+                    'Value': event['email']
+                }
+            ],
+            ValidationData=[
+                {
+                    'Name': "email",
+                    'Value': event['email']
+                },
+                {
+                    'Name': "custom:username",
+                    'Value': event['username']
                 }
             ]
+        )
 
-        )           
+    except cognito_client.exceptions.UsernameExistsException as e:
+        return {
+            "error": True,
+            "statusCode": 500,
+            "body": json.dumps({
+                "message": "This username already exists"
+            }),
+            "data": None
+        }
+
+    except cognito_client.exceptions.InvalidPasswordException as e:
+        return {
+            "error": True,
+            "statusCode": 500,
+            "body": json.dumps({
+                "message": "Password should have Caps, \
+                            Special Chars, Numbers"
+            }),
+            "data": None
+        }
+
+    except cognito_client.exceptions.UserLambdaValidationException as e:
+        return {
+            "error": True,
+            "statusCode": 500,
+            "body": json.dumps({
+                "message": "Email already exists"
+            }),
+            "data": None
+        }
+
+    except Exception as e:
+        return {
+            "error": True,
+            "statusCode": 500,
+            "body": json.dumps({
+                "message": str(e),
+            }),
+            "data": None
+    }          
 
     return {
         "error": False,

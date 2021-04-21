@@ -1,3 +1,5 @@
 pytest
 pytest-mock
 pytest-cov
+moto
+python-jose==3.2.0

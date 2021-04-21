@@ -2,6 +2,8 @@ import json
 
 import pytest
 
+from moto import mock_cognitoidp
+
 from create_user_account import app
 
 
@@ -65,13 +67,12 @@ def apigw_event_full():
         "path": "/examplepath",
     }
 
-
+@mock_cognitoidp
 def test_create_account_success(apigw_event_full, mocker):
 
     ret = app.lambda_handler(apigw_event_full, "")
     data = json.loads(ret["body"])
 
-    assert ret["statusCode"] == 200
     assert ret["statusCode"] == 200
     assert "message" in ret["body"]
     assert data["message"] == "Please confirm your signup, \
