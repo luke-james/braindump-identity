@@ -52,7 +52,7 @@ def lambda_handler(event, context):
 
     is_missing_field, missing_field = given_all_auth_methods(event)
     
-    '''if is_missing_field:
+    if is_missing_field:
         return {
             "error": True,
             "statusCode": 400,
@@ -60,7 +60,7 @@ def lambda_handler(event, context):
                 "message": f"{ missing_field } missing"
             }),
             "data": None
-        }'''
+        }
             
 
     return {
