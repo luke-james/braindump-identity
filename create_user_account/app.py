@@ -40,6 +40,9 @@ def given_all_auth_methods(event):
 
     return False, ''
 
+def get_cognito_client():
+    return boto3.client('cognito-idp')
+
 
 def lambda_handler(event, context):
 
@@ -61,7 +64,29 @@ def lambda_handler(event, context):
             }),
             "data": None
         }
+
+
+    try:
+
+        cognito_response = get_cognito_client().sign_up(
+
+            ClientId=CLIENT_SECRET,
+            SecretHash=get_secret_hash(event['username']),
             
+            Username=event['username'],
+            Password=event['password'],
+
+            UserAttributes=[
+                {
+                    'Name': "name",
+                    'Value': event['name']
+                },
+                {
+
+                }
+            ]
+
+        )           
 
     return {
         "error": False,
