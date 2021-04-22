@@ -124,7 +124,7 @@ def test_create_account_username_exists(mock_get_client_secret, mock_user_pool_i
     '''
     Create a fake user with the same username as the one we will be injecting with our test payload.
     '''
-    
+
     client.admin_create_user(
         UserPoolId=user_pool["UserPool"]["Id"],
         Username=apigw_event_full["username"]
@@ -137,25 +137,105 @@ def test_create_account_username_exists(mock_get_client_secret, mock_user_pool_i
     assert "message" in ret["body"]
     assert data["message"] == "This username already exists"
 
-@pytest.mark.skip(reason="no way of currently testing this")
-def test_create_account_invalid_password(apigw_event_full, mocker):
+
+@pytest.mark.skip(reason="Moto doesn't want to raise the PasswordNotValidException!?")
+@patch.object(app, 'get_client_id', return_value="fake_client_id")
+@patch.object(app, 'get_user_pool_id', return_value="fake_user_pool_id")
+@patch.object(app, 'get_client_secret', return_value="fake_client_secret")
+@mock_cognitoidp
+def test_create_account_invalid_password(mock_get_client_secret, mock_user_pool_id, mock_client_id, apigw_event_full, mocker):
+
+    client = boto3.client('cognito-idp', region_name='us-east-1')
+    
+    user_pool = client.create_user_pool(
+        PoolName=str(uuid.uuid4()),
+        AutoVerifiedAttributes=["email"],
+        Policies={
+            'PasswordPolicy': {
+                'MinimumLength': 6,
+                'RequireUppercase': True,
+                'RequireLowercase': True,
+                'RequireNumbers': True,
+                'RequireSymbols': True
+            }
+        }
+    )
+
+    user_pool_client = client.create_user_pool_client(
+        UserPoolId=user_pool["UserPool"]["Id"], 
+        ClientName="fake_user_pool_client",
+        GenerateSecret=True
+    )
+
+    mock_user_pool_id.return_value = user_pool["UserPool"]["Id"]
+    mock_client_id.return_value = user_pool_client["UserPoolClient"]["ClientId"]
+    mock_get_client_secret.return_value = user_pool_client["UserPoolClient"]["ClientSecret"]
 
     ret = app.lambda_handler(apigw_event_full, "")
     data = json.loads(ret["body"])
 
-    assert ret["statusCode"] == 200
-    assert ret["statusCode"] == 200
+    assert ret["statusCode"] == 500
     assert "message" in ret["body"]
-    assert data["message"] == "Password should only have Caps,\
-                       Special Chars & Numbers"
+    assert data["message"] == "Password MUST have Caps, Lowercase & > 8 digits"
 
-@pytest.mark.skip(reason="no way of currently testing this")
-def test_create_account_email_exists(apigw_event_full, mocker):
+
+@pytest.mark.skip(reason="PreSignup Validation function not implemented to check if the same email already exists.")
+@patch.object(app, 'get_client_id', return_value="fake_client_id")
+@patch.object(app, 'get_user_pool_id', return_value="fake_user_pool_id")
+@patch.object(app, 'get_client_secret', return_value="fake_client_secret")
+@mock_cognitoidp
+def test_create_account_email_exists(mock_get_client_secret, mock_user_pool_id, mock_client_id, apigw_event_full, mocker):
+
+    client = boto3.client('cognito-idp', region_name='us-east-1')
+    
+    user_pool = client.create_user_pool(
+        PoolName=str(uuid.uuid4()),
+        AutoVerifiedAttributes=["email"]
+    )
+
+    user_pool_client = client.create_user_pool_client(
+        UserPoolId=user_pool["UserPool"]["Id"], 
+        ClientName="fake_user_pool_client",
+        GenerateSecret=True
+    )
+
+    mock_user_pool_id.return_value = user_pool["UserPool"]["Id"]
+    mock_client_id.return_value = user_pool_client["UserPoolClient"]["ClientId"]
+    mock_get_client_secret.return_value = user_pool_client["UserPoolClient"]["ClientSecret"]
+
+    '''
+    Create a fake user with a unique username (but same email) as the one we will be injecting with our test payload.
+    '''
+
+    client.admin_create_user(
+        UserPoolId=user_pool["UserPool"]["Id"],
+        Username=apigw_event_full["username"] + "-unique",
+        UserAttributes=[
+                {
+                    'Name': "name",
+                    'Value': apigw_event_full["name"] 
+                },
+                {
+                    'Name': "email",
+                    'Value': apigw_event_full["email"] 
+                }
+            ],
+        ValidationData=[
+                {
+                    'Name': "email",
+                    'Value': apigw_event_full["email"] 
+                },
+                {
+                    'Name': "custom:username",
+                    'Value': apigw_event_full["username"] 
+                }
+            ]
+    )
+
 
     ret = app.lambda_handler(apigw_event_full, "")
     data = json.loads(ret["body"])
 
-    assert ret["statusCode"] == 200
-    assert ret["statusCode"] == 200
+    assert ret["statusCode"] == 500
     assert "message" in ret["body"]
     assert data["message"] == "Email already exists"

@@ -80,13 +80,17 @@ def lambda_handler(event, context):
 
     cognito_client = get_cognito_client()
 
+    print(cognito_client.describe_user_pool(
+        UserPoolId=get_user_pool_id()
+    ))
+
     try:
 
         cognito_response = cognito_client.sign_up(
             ClientId=get_client_id(),
             SecretHash=get_secret_hash(event['username']),
             Username=event['username'],
-            Password=event['password'],
+            Password="abcdef",
             UserAttributes=[
                 {
                     'Name': "name",
@@ -124,8 +128,7 @@ def lambda_handler(event, context):
             "error": True,
             "statusCode": 500,
             "body": json.dumps({
-                "message": "Password should have Caps, \
-                            Special Chars, Numbers"
+                "message": "Password MUST have Caps, Lowercase & > 8 digits"
             }),
             "data": None
         }
@@ -149,6 +152,12 @@ def lambda_handler(event, context):
             }),
             "data": None
     }          
+
+
+    print(cognito_client.admin_get_user(
+        UserPoolId=get_user_pool_id(),
+        Username=event['username']
+    ))
 
     return {
         "error": False,
