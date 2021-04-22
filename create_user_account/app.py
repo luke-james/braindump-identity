@@ -54,7 +54,7 @@ def given_all_auth_methods(event):
     return False, ''
 
 def get_cognito_client():
-    return boto3.client('cognito-idp')
+    return boto3.client('cognito-idp', region_name='us-east-1')
 
 
 def lambda_handler(event, context):
