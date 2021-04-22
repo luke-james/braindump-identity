@@ -9,23 +9,33 @@ import base64
 
 import json
 
-USER_POOL_ID = os.environ.get('USER_POOL_ID')
-CLIENT_ID = os.environ.get('CLIENT_ID')
-CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
 
-AUTH_METHODS = [
+def get_auth_methods():
+    return [
     "username",
     "password",
     "email",
     "name"
 ]
 
+def get_user_pool_id():
+    return os.environ.get('USER_POOL_ID')
+
+
+def get_client_id():
+    return os.environ.get('CLIENT_ID')
+
+
+def get_client_secret():
+    return os.environ.get('CLIENT_SECRET')
+
+
 def get_secret_hash(username):
 
-    message = username + CLIENT_ID
-    
+    message = username + get_client_id()
+
     digest = hmac.new(
-                    str(CLIENT_SECRET).encode('utf-8'), 
+                    str(get_client_secret()).encode('utf-8'), 
                     msg=str(message).encode('utf-8'),
                     digestmod=hashlib.sha256
                 ).digest()
@@ -34,9 +44,10 @@ def get_secret_hash(username):
     
     return d2
 
+
 def given_all_auth_methods(event):
 
-    for field in AUTH_METHODS:
+    for field in get_auth_methods():
         if not event.get(field):
             return True, field
 
@@ -72,7 +83,7 @@ def lambda_handler(event, context):
     try:
 
         cognito_response = cognito_client.sign_up(
-            ClientId=CLIENT_SECRET,
+            ClientId=get_client_id(),
             SecretHash=get_secret_hash(event['username']),
             Username=event['username'],
             Password=event['password'],

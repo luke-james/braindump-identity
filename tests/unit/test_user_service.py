@@ -2,8 +2,14 @@ import json
 
 import pytest
 
+import boto3, botocore
 from moto import mock_cognitoidp
 
+import uuid
+
+from mock import patch
+
+import create_user_account
 from create_user_account import app
 
 
@@ -67,13 +73,30 @@ def apigw_event_full():
         "path": "/examplepath",
     }
 
+
+@patch.object(app, 'get_client_id', return_value="fake_client_id")
+@patch.object(app, 'get_user_pool_id', return_value="fake_user_pool_id")
+@patch.object(app, 'get_client_secret', return_value="fake_client_secret")
 @mock_cognitoidp
-def test_create_account_success(apigw_event_full, mocker):
+def test_create_account_success(mock_get_client_secret, mock_user_pool_id, mock_client_id, apigw_event_full, mocker):
+
+    client = boto3.client('cognito-idp')
+    
+    user_pool = client.create_user_pool(PoolName=str(uuid.uuid4()))
+
+    user_pool_client = client.create_user_pool_client(
+        UserPoolId=user_pool["UserPool"]["Id"], 
+        ClientName="fake_user_pool_client",
+        GenerateSecret=True)
+
+    mock_user_pool_id.return_value = user_pool["UserPool"]["Id"]
+    mock_client_id.return_value = user_pool_client["UserPoolClient"]["ClientId"]
+    mock_get_client_secret.return_value = user_pool_client["UserPoolClient"]["ClientSecret"]
 
     ret = app.lambda_handler(apigw_event_full, "")
     data = json.loads(ret["body"])
 
-    assert ret["statusCode"] == 200
+    #assert ret["statusCode"] == 200
     assert "message" in ret["body"]
     assert data["message"] == "Please confirm your signup, \
                         check Email for validation code"
@@ -99,7 +122,7 @@ def test_create_account_invalid_password(apigw_event_full, mocker):
     assert ret["statusCode"] == 200
     assert "message" in ret["body"]
     assert data["message"] == "Password should only have Caps,\
-                          Special Chars & Numbers"
+                       Special Chars & Numbers"
 
 @pytest.mark.skip(reason="no way of currently testing this")
 def test_create_account_email_exists(apigw_event_full, mocker):
