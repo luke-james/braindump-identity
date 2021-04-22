@@ -80,7 +80,7 @@ def apigw_event_full():
 @mock_cognitoidp
 def test_create_account_success(mock_get_client_secret, mock_user_pool_id, mock_client_id, apigw_event_full, mocker):
 
-    client = boto3.client('cognito-idp')
+    client = boto3.client('cognito-idp', region_name='us-east-1')
     
     user_pool = client.create_user_pool(PoolName=str(uuid.uuid4()))
 
