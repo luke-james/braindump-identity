@@ -9,6 +9,11 @@ Description: >
 Globals:
   Function:
     Timeout: 3
+    Environment:
+      Variables:
+        USER_POOL_ID: "us-east-1_Oe23Icwfl"
+        CLIENT_ID: "5m7trf5i6ea494d105ha1kpo2i"
+        CLIENT_SECRET: "19kbuqu0cf7lfs0gg8ruk4v4qo8sec0pil49be63bhimgktakape"
 
 Resources:
   HelloWorldFunction:
