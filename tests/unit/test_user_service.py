@@ -26,7 +26,7 @@ def apigw_event_full():
     """ Generates API GW Event"""
 
     return {
-        "body": get_apigw_body_json(),
+        "body": json.dumps(get_apigw_body_json()),
         "requestContext": {
             "resourceId": "123456",
             "apiId": "1234567890",
@@ -128,8 +128,8 @@ def test_create_account_username_exists(mock_get_client_secret, mock_user_pool_i
     '''
 
     client.admin_create_user(
-        UserPoolId=user_pool["UserPool"]["Id"],
-        Username=apigw_event_full["body"]["username"]
+        UserPoolId=user_pool['UserPool']['Id'],
+        Username=json.loads(apigw_event_full['body'])['username']
     )
 
     ret = app.lambda_handler(apigw_event_full, "")

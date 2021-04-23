@@ -18,6 +18,10 @@ def get_auth_methods():
     "name"
 ]
 
+
+def get_account_data_from_event_body(raw_event):
+    return json.loads(raw_event['body'])
+
 def get_user_pool_id():
     return os.environ.get('USER_POOL_ID')
 
@@ -45,10 +49,10 @@ def get_secret_hash(username):
     return d2
 
 
-def given_all_auth_methods(event):
+def given_all_auth_methods(data):
 
     for field in get_auth_methods():
-        if not event["body"].get(field):
+        if not data.get(field):
             return True, field
 
     return False, ''
@@ -61,12 +65,14 @@ def lambda_handler(event, context):
 
     ## This function will create a new user account within Cognito.
 
+    new_user_data = get_account_data_from_event_body(event)
+
     '''
     Check to make sure we have ALL the info needed to sign the user up 
     for a new account.
     '''
 
-    is_missing_field, missing_field = given_all_auth_methods(event)
+    is_missing_field, missing_field = given_all_auth_methods(new_user_data)
     
     if is_missing_field:
         return {
@@ -83,27 +89,27 @@ def lambda_handler(event, context):
 
         cognito_response = cognito_client.sign_up(
             ClientId=get_client_id(),
-            SecretHash=get_secret_hash(event['body']['username']),
-            Username=event['body']['username'],
-            Password="abcdef",
+            SecretHash=get_secret_hash(new_user_data['username']),
+            Username=new_user_data['username'],
+            Password=new_user_data['password'],
             UserAttributes=[
                 {
                     'Name': "name",
-                    'Value': event['body']['name']
+                    'Value': new_user_data['name']
                 },
                 {
                     'Name': "email",
-                    'Value': event['body']['email']
+                    'Value': new_user_data['email']
                 }
             ],
             ValidationData=[
                 {
                     'Name': "email",
-                    'Value': event['body']['email']
+                    'Value': new_user_data['email']
                 },
                 {
                     'Name': "custom:username",
-                    'Value': event['body']['username']
+                    'Value': new_user_data['username']
                 }
             ]
         )
