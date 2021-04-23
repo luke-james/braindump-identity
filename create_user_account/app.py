@@ -9,6 +9,19 @@ import base64
 
 import json
 
+'''
+
+FUNCTION --> 
+
+    CREATE USER ACCOUNT
+
+DESCRIPTION --> 
+
+    This function will communicate with the AWS cognito service and create a new account, using the password
+    policy set as part of our Cognito User Pool (created manually in AWS Console).
+
+'''
+
 
 def get_auth_methods():
     return [
@@ -21,6 +34,7 @@ def get_auth_methods():
 
 def get_account_data_from_event_body(raw_event):
     return json.loads(raw_event['body'])
+
 
 def get_user_pool_id():
     return os.environ.get('USER_POOL_ID')
@@ -57,13 +71,19 @@ def given_all_auth_methods(data):
 
     return False, ''
 
+
 def get_cognito_client():
     return boto3.client('cognito-idp', region_name='us-east-1')
 
 
 def lambda_handler(event, context):
 
-    ## This function will create a new user account within Cognito.
+    '''
+
+    This is our handler function which will contain the majority of the logic for interfacing with 
+    Cognito to create a new account.
+
+    '''
 
     try:
 
@@ -81,7 +101,7 @@ def lambda_handler(event, context):
 
     '''
     Check to make sure we have ALL the info needed to sign the user up 
-    for a new account.
+    for a new account (e.g. username, password, email, name etc.).
     '''
 
     is_missing_field, missing_field = given_all_auth_methods(new_user_data)
