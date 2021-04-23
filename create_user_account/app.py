@@ -65,7 +65,19 @@ def lambda_handler(event, context):
 
     ## This function will create a new user account within Cognito.
 
-    new_user_data = get_account_data_from_event_body(event)
+    try:
+
+        new_user_data = get_account_data_from_event_body(event)
+
+    except TypeError as e:
+
+        return {
+            "statusCode": 400,
+            "body": json.dumps({
+                "error": True,
+                "message": "Payload body is missing"
+            })
+        }
 
     '''
     Check to make sure we have ALL the info needed to sign the user up 
