@@ -48,7 +48,7 @@ def get_secret_hash(username):
 def given_all_auth_methods(event):
 
     for field in get_auth_methods():
-        if not event.get(field):
+        if not event["body"].get(field):
             return True, field
 
     return False, ''
@@ -79,35 +79,31 @@ def lambda_handler(event, context):
 
     cognito_client = get_cognito_client()
 
-    print(cognito_client.describe_user_pool(
-        UserPoolId=get_user_pool_id()
-    ))
-
     try:
 
         cognito_response = cognito_client.sign_up(
             ClientId=get_client_id(),
-            SecretHash=get_secret_hash(event['username']),
-            Username=event['username'],
+            SecretHash=get_secret_hash(event['body']['username']),
+            Username=event['body']['username'],
             Password="abcdef",
             UserAttributes=[
                 {
                     'Name': "name",
-                    'Value': event['name']
+                    'Value': event['body']['name']
                 },
                 {
                     'Name': "email",
-                    'Value': event['email']
+                    'Value': event['body']['email']
                 }
             ],
             ValidationData=[
                 {
                     'Name': "email",
-                    'Value': event['email']
+                    'Value': event['body']['email']
                 },
                 {
                     'Name': "custom:username",
-                    'Value': event['username']
+                    'Value': event['body']['username']
                 }
             ]
         )
@@ -147,12 +143,6 @@ def lambda_handler(event, context):
                 "message": str(e),
             })
     }          
-
-
-    print(cognito_client.admin_get_user(
-        UserPoolId=get_user_pool_id(),
-        Username=event['username']
-    ))
 
     return {
         "statusCode": 200,

@@ -12,18 +12,21 @@ from mock import patch
 import create_user_account
 from create_user_account import app
 
+def get_apigw_body_json():
+    return {
+        "username": "test_user1",
+        "email": "test@test.com",
+        "password": "password123",
+        "name": "Jon Smith"
+    }
+
 
 @pytest.fixture()
 def apigw_event_full():
     """ Generates API GW Event"""
 
     return {
-        "username": "test_user1",
-        "email": "test@test.com",
-        "password": "password123",
-        "name": "Jon Smith",
-        "body": '{ "test": "body"}',
-        "resource": "/{proxy+}",
+        "body": get_apigw_body_json(),
         "requestContext": {
             "resourceId": "123456",
             "apiId": "1234567890",
@@ -126,7 +129,7 @@ def test_create_account_username_exists(mock_get_client_secret, mock_user_pool_i
 
     client.admin_create_user(
         UserPoolId=user_pool["UserPool"]["Id"],
-        Username=apigw_event_full["username"]
+        Username=apigw_event_full["body"]["username"]
     )
 
     ret = app.lambda_handler(apigw_event_full, "")
