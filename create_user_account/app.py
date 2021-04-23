@@ -70,12 +70,11 @@ def lambda_handler(event, context):
     
     if is_missing_field:
         return {
-            "error": True,
             "statusCode": 400,
             "body": json.dumps({
+                "error": True,
                 "message": f"{ missing_field } is missing"
-            }),
-            "data": None
+            })
         }
 
     cognito_client = get_cognito_client()
@@ -115,42 +114,38 @@ def lambda_handler(event, context):
 
     except cognito_client.exceptions.UsernameExistsException as e:
         return {
-            "error": True,
             "statusCode": 500,
             "body": json.dumps({
+                "error": True,
                 "message": "This username already exists"
-            }),
-            "data": None
+            })
         }
 
     except cognito_client.exceptions.InvalidPasswordException as e:
         return {
-            "error": True,
             "statusCode": 500,
             "body": json.dumps({
+                "error": True,
                 "message": "Password MUST have Caps, Lowercase & > 8 digits"
-            }),
-            "data": None
+            })
         }
 
     except cognito_client.exceptions.UserLambdaValidationException as e:
         return {
-            "error": True,
             "statusCode": 500,
             "body": json.dumps({
+                "error": True,
                 "message": "Email already exists"
-            }),
-            "data": None
+            })
         }
 
     except Exception as e:
         return {
-            "error": True,
             "statusCode": 500,
             "body": json.dumps({
+                "error": True,
                 "message": str(e),
-            }),
-            "data": None
+            })
     }          
 
 
@@ -160,11 +155,9 @@ def lambda_handler(event, context):
     ))
 
     return {
-        "error": False,
         "statusCode": 200,
         "body": json.dumps({
-        "message": "Please confirm your signup, \
-                        check Email for validation code",
-        }),
-        "data": None
+            "error": False,
+            "message": "Please confirm your signup, check Email for validation code",
+        })
     }

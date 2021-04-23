@@ -98,8 +98,7 @@ def test_create_account_success(mock_get_client_secret, mock_user_pool_id, mock_
 
     assert ret["statusCode"] == 200
     assert "message" in ret["body"]
-    assert data["message"] == "Please confirm your signup, \
-                        check Email for validation code"
+    assert data["message"] == "Please confirm your signup, check Email for validation code"
 
 
 @patch.object(app, 'get_client_id', return_value="fake_client_id")
